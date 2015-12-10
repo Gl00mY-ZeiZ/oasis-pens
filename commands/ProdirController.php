@@ -60,7 +60,7 @@ class ProdirController extends Controller
             }
 
             foreach ($property['legend'] as $subdir => $slug) {
-                // Перебераем цвета
+                // Перебираем цвета
                 for ($i = 0; $i < count($property['legend']); $i++) {
                     foreach ($property['colors'][$i] as $code => $digits) {
                         foreach ($digits as $colorId) {
