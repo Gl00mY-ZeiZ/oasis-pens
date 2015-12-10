@@ -6,7 +6,10 @@ use yii\console\Controller;
 
 class ProdirController extends Controller
 {
-    private $saveDir = '/opt/dev/prodir.grab/data/';
+    /**
+     * @var string Путь к дире загрузок
+     */
+    private $saveDir = '/var/www/xxxxxxxxxxxxx';
 
     /**
      * @var string Путь до картинок конструктора
@@ -14,12 +17,12 @@ class ProdirController extends Controller
     private $permanentPath = 'http://www.prodir.com/configurator/services/assets90_new/';
 
     /**
-     * @var array Идщники вида
+     * @var array Id разных ракурсов
      */
     private $views = [9, 10, 11];
 
     /**
-     * Пиздим картинки из продировского конструктора
+     * Грабить кОрОваны
      */
     public function actionIndex()
     {
@@ -33,7 +36,9 @@ class ProdirController extends Controller
         }
 
         // Подгружаем дерево
+        echo 'Подгружаем основной конфиг...' . PHP_EOL;
         $tree = require(__DIR__ . '/../data/tree.php');
+        echo 'Конфиг подгружен' . PHP_EOL;
         //var_dump($tree);
 
         // Собираем все ссылки для закачки
@@ -60,15 +65,16 @@ class ProdirController extends Controller
                     foreach ($property['colors'][$i] as $code => $digits) {
                         foreach ($digits as $colorId) {
                             foreach ($this->views as $variant) {
+                                // ссылка для скачивания
                                 $grabUrl = $this->permanentPath . $model . '/' . $slug . '_' . $code . '_' . $colorId . '_' . $variant . '.png';
+                                // дира для сохранения
                                 $saveDir = $this->saveDir . $model . '/' . $subdir . '/';
                                 if (!is_dir($saveDir)) {
                                     //echo 'Создаю директорию: ' . $saveDir . PHP_EOL;
                                     mkdir($saveDir, 0777, true);
                                 }
-
+                                // имя файла для сохранения
                                 $saveFile = $code . '_' . $colorId . '_' . $variant . '.png';
-
                                 $links[$grabUrl] = $saveDir . $saveFile;
                             }
                         }
@@ -77,12 +83,13 @@ class ProdirController extends Controller
             }
         }
         $cnt = count($links);
-        echo 'Всего готово ' . $cnt . ' ссылок на закачку' . PHP_EOL;
+        echo 'Ссылки для скачивания готовы. Всего готово ' . $cnt . ' ссылок' . PHP_EOL;
         echo 'Начинаем скачивать картинки с prodir.com' . PHP_EOL;
 
         foreach ($links as $url => $path) {
-            usleep(200);
+            usleep(90);
             exec('wget -q ' . $url . ' -O ' . $path, $result);
+            // @todo: надо сделать процентную загрузку - но лень ), точек достаточно
             if ($result) {
                 echo PHP_EOL . $url . ' СЛОМАНА!!!' . PHP_EOL;
             } else {
@@ -91,7 +98,6 @@ class ProdirController extends Controller
         }
 
         echo 'Всё заебись' . PHP_EOL;
-        //echo PHP_EOL;
-        Controller::EXIT_CODE_NORMAL;
+        return Controller::EXIT_CODE_NORMAL;
     }
 }
